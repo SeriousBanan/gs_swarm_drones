@@ -5,13 +5,16 @@ Module with objects definitions.
 from dataclasses import dataclass, field
 from typing import Dict, Any, Set, Iterator, Union
 from time import sleep
-from gs_board import BoardManager  # pylint: disable=no-name-in-module
-from gs_flight import (FlightController,  # pylint: disable=no-name-in-module
+
+from gs_board import BoardManager as _BoardManager  # pylint: disable=no-name-in-module
+from gs_flight import (FlightController as _FlightController,  # pylint: disable=no-name-in-module
                        CallbackEvent as _CallbackEvent)  # pylint: disable=no-name-in-module
+from gs_sensors import SensorManager as _SensorManager  # pylint: disable=no-name-in-module
+
 from .setup_loggers import logger as _logger
 
 
-__all__ = ["Coords", "Vertex", "Graph", "Vehicle"]
+__all__ = ["Coords", "Vertex", "Graph", "Drone"]
 
 
 @dataclass(frozen=True)
@@ -27,6 +30,7 @@ class Coords:
 class Arc:
     """Class of weighted arc to some vertex."""
 
+    from_vertex: "Vertex"
     to_vertex: "Vertex"
     weight: float
 
@@ -37,7 +41,7 @@ class Vertex:
 
     id_: int
     coords: Coords
-    value: int = field(default=-1, hash=False)
+    value: float = field(default=-1, hash=False)
     adjacent: Set["Vertex"] = field(default_factory=set, repr=False, hash=False)
     arcs: Set[Arc] = field(default_factory=set, repr=False, hash=False)
 
@@ -57,7 +61,8 @@ class Vertex:
     def add_arc(self, to_vertex: "Vertex", weight: float = 0) -> None:
         """Create arc to vertex."""
 
-        self.arcs.add(Arc(to_vertex=to_vertex,
+        self.arcs.add(Arc(from_vertex=self,
+                          to_vertex=to_vertex,
                           weight=weight))
 
 
@@ -139,102 +144,117 @@ class Graph:
 
 
 @dataclass
-class Vehicle:
+class Drone:
     """
-    Vehicle class.
+    Drone class.
 
     Each vehicle contains:
-    - id
-    - his current position (In which Vertex)
-    - link to global field
-    - personal graph
+    - id.
+    - his position (In which Vertex).
+    - link to global field.
+    - personal graph.
+    - his charge property.
     """
 
     id_: int
-    cur_position: Vertex
+    position: Vertex
     global_graph: Graph
     graph: Graph = field(default_factory=Graph)
-    _board_manager: BoardManager = field(default_factory=BoardManager)
+    _board_manager: _BoardManager = field(default_factory=_BoardManager)
+    _sensor_manager: _SensorManager = field(default_factory=_SensorManager)
     _flight_callback_event: int = 0
 
     def __post_init__(self):
-        def callback(event):
+        def callback(event_num):
             """Callback for flight controller."""
 
             nonlocal self
-            self._flight_callback_event = event.data
+            self._flight_callback_event = event_num.data
 
-        self._flight_controller = FlightController(callback)
+        # Wait until board starts.
+        while not self._board_manager.runStatus():
+            sleep(0.05)
+
+        self._flight_controller = _FlightController(callback)
+
+    @property
+    def charge(self) -> float:
+        """Return charge of the Drone."""
+
+        charge = self._sensor_manager.power()
+        _logger.info(f"Drone {self.id_} charge: {charge}.")
+
+        return self._sensor_manager.power()
 
     def takeoff(self) -> None:
         """Takeoff vehicle from the ground."""
 
-        _logger.info(f"Vehicle {self.id_} starts engines.")
+        _logger.info(f"Drone {self.id_} starts engines.")
 
         # Send command to starts engines.
         responce_status = self._flight_controller.preflight()
-        _logger.debug(f"Vehicle {self.id_} _flight_controller.preflight responce: {responce_status}.")
+        _logger.debug(f"Drone {self.id_} _flight_controller.preflight responce: {responce_status}.")
 
         # Wait until engines start.
         while self._flight_callback_event != _CallbackEvent.ENGINES_STARTED:
             sleep(0.05)
 
-        _logger.info(f"Vehicle {self.id_} has started engines. Takeoff starts.")
+        _logger.info(f"Drone {self.id_} has started engines. Takeoff starts.")
 
         # Send command to takeoff.
         responce_status = self._flight_controller.takeoff()
-        _logger.debug(f"Vehicle {self.id_} _flight_controller.takeoff responce: {responce_status}.")
+        _logger.debug(f"Drone {self.id_} _flight_controller.takeoff responce: {responce_status}.")
 
         # Wait until takeoff complete.
         while self._flight_callback_event != _CallbackEvent.TAKEOFF_COMPLETE:
             sleep(0.05)
 
-        _logger.info(f"Vehicle {self.id_} has completed takeoff.")
+        _logger.info(f"Drone {self.id_} has completed takeoff.")
 
     def landing(self) -> None:
         """Land vehicle to the ground."""
 
-        _logger.info(f"Vehicle {self.id_} starts lending.")
+        _logger.info(f"Drone {self.id_} starts lending.")
 
         # Send command to start landing
         responce_status = self._flight_controller.landing()
-        _logger.debug(f"Vehicle {self.id_} _flight_controller.landing responce: {responce_status}")
+        _logger.debug(f"Drone {self.id_} _flight_controller.landing responce: {responce_status}")
 
         # Wait until landing complete.
         while self._flight_callback_event != _CallbackEvent.COPTER_LANDED:
             sleep(0.05)
 
-        _logger.info(f"Vehicle {self.id_} has completed landing.")
+        _logger.info(f"Drone {self.id_} has completed landing.")
 
         # Send command to stop engines.
         responce_status = self._flight_controller.disarm()
-        _logger.debug(f"Vehicle {self.id_} _flight_controller.disarm responce: {responce_status}")
+        _logger.debug(f"Drone {self.id_} _flight_controller.disarm responce: {responce_status}")
 
-        _logger.info(f"Vehicle {self.id_} has stopped engines.")
+        _logger.info(f"Drone {self.id_} has stopped engines.")
 
     def move_to(self, vertex: Vertex) -> None:
         """Moving vehicle to vertex."""
 
-        _logger.info(f"Vehicle {self.id_} starts moving to {vertex}.")
+        _logger.info(f"Drone {self.id_} starts moving to {vertex}.")
 
         # Send command to move to vertex.
         coords = vertex.coords
         responce_status = self._flight_controller.goToLocalPoint(coords.x, coords.y, coords.z)
-        _logger.debug(f"Vehicle {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
+        _logger.debug(f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
 
         # Wait until vehicle reach point.
         while self._flight_callback_event != _CallbackEvent.POINT_REACHED:
             sleep(0.05)
 
-        _logger.info(f"Vehicle {self.id_} has reached {vertex}")
+        self.position = vertex
+        _logger.info(f"Drone {self.id_} has reached {vertex}")
 
     def post_to_chanel(self, data: dict) -> None:
         """Posting data to vehicle's chanel."""
 
-        _logger.info(f"Vehicle {self.id_} posting {data}.")
+        _logger.info(f"Drone {self.id_} posting {data}.")
         ...
 
 
 del dataclass, field
 del Dict, Set, Iterator, Union, Any
-del BoardManager, FlightController
