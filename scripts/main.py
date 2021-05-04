@@ -4,7 +4,7 @@
 
 import os
 import json
-from typing import Set
+from typing import List, Set
 
 import rospy
 
@@ -228,6 +228,59 @@ def walk_graph(drone: Drone) -> None:
                            not_checked=not_checked)
 
 
+def return_to_base(drone: Drone) -> None:
+    """Return to base from current position, going through selected vertexes by drone."""
+
+    def find_path(graph: Graph, from_vertex: Vertex, to_vertex: Vertex) -> List[Vertex]:
+        """Find shortest path using Dijkstra’s algorithm."""
+
+        if from_vertex not in graph or to_vertex not in graph:
+            raise ValueError("Given vertex not in graph.")
+
+        not_checked = set(graph)
+        distances = {vertex: float("inf") for vertex in graph}  # distances between to_vertex and vertex.
+        ancestor = {}
+
+        distances[from_vertex] = 0
+
+        # Check every vertex and set the distances to neighbors and ancestors in path.
+        while not_checked:
+            vertex = min(not_checked, key=lambda vertex: distances[vertex])
+
+            logger.debug(f"find_path: {vertex.adjacent=}")
+            logger.debug(f"find_path: {distances[vertex]=}")
+
+            for neighbor in vertex.adjacent:
+                current_distance = distances[neighbor]
+                new_distance = distances[vertex] + distance(vertex, neighbor)
+
+                if new_distance < current_distance:
+                    distances[neighbor] = new_distance
+                    ancestor[neighbor] = vertex
+
+            not_checked.remove(vertex)
+
+        path: List[Vertex] = []
+        vertex = to_vertex
+
+        logger.debug(f"find_path: {not_checked=}")
+        logger.debug(f"find_path: {ancestor=}")
+        logger.debug(f"find_path: {distances=}")
+
+        while vertex != from_vertex:
+            path.insert(0, vertex)
+            vertex = ancestor[vertex]
+
+        return path
+
+    path = find_path(graph=drone.graph,
+                     from_vertex=drone.position,
+                     to_vertex=drone.graph[CONFIGURATION["drones initial positions"][str(drone.id_)]])
+
+    for vertex in path:
+        drone.move_to(vertex)
+
+
 def main(drone_id: int) -> None:
     """Main function."""
 
@@ -266,7 +319,8 @@ def main(drone_id: int) -> None:
     logger.info(f"Drone {drone_id} has completed his work.")
     logger.info(f"Drone {drone_id} returning to base.")
 
-    drone.move_to(global_graph[CONFIGURATION["drones initial positions"][str(drone_id)]])
+    return_to_base(drone)
+
     drone.landing()
 
     logger.debug(f"Drone {drone_id} has landed.")
