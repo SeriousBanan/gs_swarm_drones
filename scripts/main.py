@@ -8,6 +8,10 @@ from typing import Set
 
 import rospy
 
+PKG_PATH = os.getenv("PKG_PATH")
+if PKG_PATH:
+    os.chdir(PKG_PATH)
+
 try:
     from .tools.useful_functions import (initialize_graph_from_dict,
                                          distance)
@@ -82,7 +86,7 @@ def split_graph(drone: Drone) -> None:
     drone.graph.add_vertex(new_vertex)
 
     # Set each drone possible chooses.
-    for drone_id in range(CONFIGURATION["drone count"]):
+    for drone_id in range(CONFIGURATION["drones count"]):
         vertex = global_graph[CONFIGURATION["drones initial positions"][str(drone_id)]]
 
         not_chosen_vertexes.remove(vertex)
@@ -91,7 +95,7 @@ def split_graph(drone: Drone) -> None:
     # Distribute all vertexes between drones.
     while not_chosen_vertexes:
         # Drones chooses one by one.
-        for drone_id in range(CONFIGURATION["drone count"]):
+        for drone_id in range(CONFIGURATION["drones count"]):
             could_choose = drones_possible_chooses[drone_id]
             could_choose.intersection_update(not_chosen_vertexes)
 
@@ -111,7 +115,7 @@ def split_graph(drone: Drone) -> None:
             # Look to the neighbor of chosen vertex and add it to possible choose
             # or create edge between previous added vertex.
             for neighbor in chosen_vertex.adjacent:
-                if neighbor.id_ in not_chosen_vertexes:
+                if neighbor in not_chosen_vertexes:
                     could_choose.add(neighbor)
 
                 elif drone_id == drone.id_ and neighbor.id_ in drone.graph:
@@ -147,7 +151,8 @@ def calculate_arcs(graph: Graph, start_vertex: Vertex, not_checked: Set[Vertex])
         for neighbor in to_vertex.adjacent:
             if (neighbor not in path and
                     neighbor.value >= to_vertex.value and
-                    neighbor not in to_vertex.arcs):
+                    neighbor not in set(map(lambda arc: arc.to_vertex, to_vertex.arcs)) and
+                    to_vertex not in set(map(lambda arc: arc.to_vertex, neighbor.arcs))):
                 weight = calculate_arc_weight(to_vertex, neighbor)
                 to_vertex.add_arc(to_vertex=neighbor, weight=weight)
 
@@ -157,8 +162,7 @@ def calculate_arcs(graph: Graph, start_vertex: Vertex, not_checked: Set[Vertex])
         # depending on status of vertex (checked or not checked).
         if to_vertex in not_checked:
             weight = (to_vertex.value - from_vertex.value +
-                      2 * max([0, *map(lambda arc: arc.weight, to_vertex.arcs)]) -
-                      sum(map(lambda arc: arc.weight, to_vertex.arcs)) + 1)
+                      max([0, *map(lambda arc: arc.weight, to_vertex.arcs)]) + 1)
         else:
             weight = max([float("-inf"), *map(lambda arc: arc.weight, to_vertex.arcs)]) - 1
 
@@ -270,8 +274,6 @@ def main(drone_id: int) -> None:
 
 if __name__ == "__main__":
     rospy.init_node("gs_swarm_drones_node")
-
-    PKG_PATH = os.getenv("PKG_PATH")
 
     _configuration_path = rospy.get_param(rospy.search_param("configuration_path"))
     _field_path = rospy.get_param(rospy.search_param("field_path"))
