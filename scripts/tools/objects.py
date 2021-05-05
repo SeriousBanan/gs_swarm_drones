@@ -148,7 +148,7 @@ class Drone:
     """
     Drone class.
 
-    Each vehicle contains:
+    Each drone contains:
     - id.
     - his position (In which Vertex).
     - link to global field.
@@ -165,15 +165,14 @@ class Drone:
     _flight_callback_event: int = 0
 
     def __post_init__(self):
-        def callback(event_num):
-            """Callback for flight controller."""
-
-            nonlocal self
-            self._flight_callback_event = event_num.data
-
         # Wait until board starts.
         while not self._board_manager.runStatus():
             sleep(0.05)
+
+        def callback(event_num):
+            """Callback for flight controller."""
+
+            self._flight_callback_event = event_num.data
 
         self._flight_controller = _FlightController(callback)
 
@@ -186,8 +185,14 @@ class Drone:
 
         return self._sensor_manager.power()
 
+    def _wait_flight_callback_event(self, event: int) -> None:
+        while self._flight_callback_event != event:
+            sleep(0.05)
+
+        self._flight_callback_event = 0
+
     def takeoff(self) -> None:
-        """Takeoff vehicle from the ground."""
+        """Takeoff drone from the ground."""
 
         _logger.info(f"Drone {self.id_} starts engines.")
 
@@ -196,8 +201,7 @@ class Drone:
         _logger.debug(f"Drone {self.id_} _flight_controller.preflight responce: {responce_status}.")
 
         # Wait until engines start.
-        while self._flight_callback_event != _CallbackEvent.ENGINES_STARTED:
-            sleep(0.05)
+        self._wait_flight_callback_event(_CallbackEvent.ENGINES_STARTED)
 
         _logger.info(f"Drone {self.id_} has started engines. Takeoff starts.")
 
@@ -206,13 +210,12 @@ class Drone:
         _logger.debug(f"Drone {self.id_} _flight_controller.takeoff responce: {responce_status}.")
 
         # Wait until takeoff complete.
-        while self._flight_callback_event != _CallbackEvent.TAKEOFF_COMPLETE:
-            sleep(0.05)
+        self._wait_flight_callback_event(_CallbackEvent.TAKEOFF_COMPLETE)
 
         _logger.info(f"Drone {self.id_} has completed takeoff.")
 
     def landing(self) -> None:
-        """Land vehicle to the ground."""
+        """Land drone to the ground."""
 
         _logger.info(f"Drone {self.id_} starts lending.")
 
@@ -221,8 +224,7 @@ class Drone:
         _logger.debug(f"Drone {self.id_} _flight_controller.landing responce: {responce_status}")
 
         # Wait until landing complete.
-        while self._flight_callback_event != _CallbackEvent.COPTER_LANDED:
-            sleep(0.05)
+        self._wait_flight_callback_event(_CallbackEvent.COPTER_LANDED)
 
         _logger.info(f"Drone {self.id_} has completed landing.")
 
@@ -233,7 +235,7 @@ class Drone:
         _logger.info(f"Drone {self.id_} has stopped engines.")
 
     def move_to(self, vertex: Vertex) -> None:
-        """Moving vehicle to vertex."""
+        """Moving drone to vertex."""
 
         _logger.info(f"Drone {self.id_} starts moving to {vertex}.")
 
@@ -242,15 +244,14 @@ class Drone:
         responce_status = self._flight_controller.goToLocalPoint(coords.x, coords.y, coords.z)
         _logger.debug(f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
 
-        # Wait until vehicle reach point.
-        while self._flight_callback_event != _CallbackEvent.POINT_REACHED:
-            sleep(0.05)
+        # Wait until drone reach point.
+        self._wait_flight_callback_event(_CallbackEvent.POINT_REACHED)
 
         self.position = vertex
         _logger.info(f"Drone {self.id_} has reached {vertex}")
 
-    def post_to_chanel(self, data: dict) -> None:
-        """Posting data to vehicle's chanel."""
+    def send_message(self, data: dict) -> None:
+        """Sending message to other drones."""
 
         _logger.info(f"Drone {self.id_} posting {data}.")
         ...
