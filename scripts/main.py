@@ -223,6 +223,14 @@ def walk_graph(drone: Drone) -> None:
 
             drone.move_to(new_position)
 
+            if drone.found_object:
+                return
+
+            found_object, path_to_image = drone.recognise()
+
+            if found_object:
+                return
+
         recalculate_values(graph=drone.graph,
                            start_vertex=drone.position,
                            not_checked=not_checked)

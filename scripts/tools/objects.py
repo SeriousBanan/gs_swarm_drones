@@ -3,13 +3,18 @@ Module with objects definitions.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, Set, Iterator, Union
+from typing import Dict, Any, Set, Iterator, Tuple, Union
 from time import sleep
 
 from gs_board import BoardManager as _BoardManager  # pylint: disable=no-name-in-module
 from gs_flight import (FlightController as _FlightController,  # pylint: disable=no-name-in-module
                        CallbackEvent as _CallbackEvent)  # pylint: disable=no-name-in-module
 from gs_sensors import SensorManager as _SensorManager  # pylint: disable=no-name-in-module
+import rospy  # pylint: disable=no-name-in-module
+
+# pylint: disable=import-error, no-name-in-module
+from gs_swarm_drones.srv import Recognise  # type: ignore
+# pylint: enable=import-error, no-name-in-module
 
 from .setup_loggers import logger as _logger
 
@@ -160,6 +165,7 @@ class Drone:
     position: Vertex
     global_graph: Graph
     graph: Graph = field(default_factory=Graph)
+    found_object: bool = False
     _board_manager: _BoardManager = field(default_factory=_BoardManager)
     _sensor_manager: _SensorManager = field(default_factory=_SensorManager)
     _flight_callback_event: int = 0
@@ -175,6 +181,9 @@ class Drone:
             self._flight_callback_event = event_num.data
 
         self._flight_controller = _FlightController(callback)
+
+        rospy.wait_for_service("gs_swarm_drones/recognise")
+        self._recognise_service = rospy.ServiceProxy("gs_swarm_drones/recognise", Recognise)
 
     @property
     def charge(self) -> float:
@@ -249,6 +258,20 @@ class Drone:
 
         self.position = vertex
         _logger.info(f"Drone {self.id_} has reached {vertex}")
+
+    def recognise(self) -> Tuple[bool, str]:
+        """Recognise tank using camera."""
+
+        _logger.info(f"Drone {self.id_} has started recognition.")
+
+        response = self._recognise_service()
+
+        _logger.debug(f"Drone {self.id_} gs_swarm_drones/recognise response: {response}")
+        _logger.info(f"Drone {self.id_} has completed recognition.")
+
+        self.found_object = response.found_object
+
+        return response.found_object, response.result_path
 
     def send_message(self, data: dict) -> None:
         """Sending message to other drones."""

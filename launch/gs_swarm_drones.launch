@@ -1,5 +1,6 @@
 <launch>
     <env name="PKG_PATH" value="$(find gs_swarm_drones)"/>
+    <env name="DETECTOR_PATH" value="$(find gs_swarm_drones)/scripts/detector"/>
     <arg name="field_path" default="$(find gs_swarm_drones)/field.json" doc="Path to json file with field configuration."/>
     <arg name="configuration_path" default="$(find gs_swarm_drones)/configuration.json" doc="Path to json file with drone configuration."/>
 
@@ -8,4 +9,6 @@
         <param name="field_path" value="$(arg field_path)"/>
         <param name="configuration_path" value="$(arg configuration_path)"/>
     </node>
+
+    <node pkg="gs_swarm_drones" type="recognise.py" name="gs_swarm_drones_recognise_node"/>
 </launch>
