@@ -221,6 +221,8 @@ class Drone:
         # Wait until takeoff complete.
         self._wait_flight_callback_event(_CallbackEvent.TAKEOFF_COMPLETE)
 
+        sleep(3)
+
         _logger.info(f"Drone {self.id_} has completed takeoff.")
 
     def landing(self) -> None:
