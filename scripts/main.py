@@ -229,6 +229,8 @@ def walk_graph(drone: Drone) -> None:
             found_object, path_to_image = drone.recognise()
 
             if found_object:
+                drone.send_image(path_to_image)
+
                 return
 
         recalculate_values(graph=drone.graph,

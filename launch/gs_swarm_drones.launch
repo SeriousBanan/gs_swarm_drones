@@ -11,4 +11,8 @@
     </node>
 
     <node pkg="gs_swarm_drones" type="recognise.py" name="gs_swarm_drones_recognise_node"/>
+    <node pkg="gs_swarm_drones" type="communication.py" name="gs_swarm_drones_communication_node">
+
+        <param name="configuration_path" value="$(arg configuration_path)"/>
+    </node>
 </launch>

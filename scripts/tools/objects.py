@@ -14,6 +14,7 @@ import rospy  # pylint: disable=no-name-in-module
 
 # pylint: disable=import-error, no-name-in-module
 from gs_swarm_drones.srv import Recognise  # type: ignore
+from gs_swarm_drones.srv import TransferData, TransferDataResponse  # type: ignore
 # pylint: enable=import-error, no-name-in-module
 
 from .setup_loggers import logger as _logger
@@ -175,15 +176,18 @@ class Drone:
         while not self._board_manager.runStatus():
             sleep(0.05)
 
-        def callback(event_num):
+        def flight_controller_callback(event_num):
             """Callback for flight controller."""
 
             self._flight_callback_event = event_num.data
 
-        self._flight_controller = _FlightController(callback)
+        self._flight_controller = _FlightController(flight_controller_callback)
 
         rospy.wait_for_service("gs_swarm_drones/recognise")
         self._recognise_service = rospy.ServiceProxy("gs_swarm_drones/recognise", Recognise)
+
+        rospy.wait_for_service("gs_swarm_drones/send_image")
+        self._send_image_service = rospy.ServiceProxy("gs_swarm_drones/send_image", TransferData)
 
     @property
     def charge(self) -> float:
@@ -222,6 +226,8 @@ class Drone:
         self._wait_flight_callback_event(_CallbackEvent.TAKEOFF_COMPLETE)
 
         sleep(3)
+
+        self.move_to(self.position)
 
         _logger.info(f"Drone {self.id_} has completed takeoff.")
 
@@ -273,6 +279,9 @@ class Drone:
 
         self.found_object = response.found_object
 
+        if self.found_object:
+            _logger.info(f"Drone {self.id_} found object.")
+
         return response.found_object, response.result_path
 
     def send_message(self, data: dict) -> None:
@@ -280,6 +289,16 @@ class Drone:
 
         _logger.info(f"Drone {self.id_} posting {data}.")
         ...
+
+    def send_image(self, image_path: str) -> None:
+        """Sending image to operator."""
+
+        _logger.info(f"Drone {self.id_} start sending image.")
+
+        response = self._send_image_service(image_path)
+
+        _logger.debug(f"Drone {self.id_} gs_swarm_drones/send_image response: {response}")
+        _logger.info(f"Drone {self.id_} has send image.")
 
 
 del dataclass, field

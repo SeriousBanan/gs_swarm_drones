@@ -4,5 +4,7 @@
     "drones initial positions": {
         "0": 0
     },
-    "drone flight altitude": 1
+    "drone flight altitude": 1,
+    "operator ip": "10.0.0.46",
+    "operator username": "pi"
 }
