@@ -8,9 +8,10 @@ import tflite_runtime.interpreter as tflite
 class Detector:
 
     def __init__(self, threshold):
+        """Initialize tflite model."""
         self.interpreter = tflite.Interpreter(
-            model_path="%s/model/model_v2_128_corr.tflite" %
-            (os.environ.get("DETECTOR_PATH")))  # if use pure tflite
+            model_path="%s/model/model_v2_320_corr_exp.tflite" %
+            (os.environ.get("DETECTOR_PATH")))
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
         self.output_details = self.interpreter.get_output_details()
@@ -20,14 +21,24 @@ class Detector:
 
         if not os.path.exists("%s/images/" % os.environ.get("DETECTOR_PATH")):
             os.mkdir("%s/images/" % os.environ.get("DETECTOR_PATH"))
+        if not os.path.exists("%s/images/detected/" % os.environ.get("DETECTOR_PATH")):
+            os.mkdir("%s/images/detected/" % os.environ.get("DETECTOR_PATH"))
+        if not os.path.exists("%s/images/raw/" % os.environ.get("DETECTOR_PATH")):
+            os.mkdir("%s/images/raw/" % os.environ.get("DETECTOR_PATH"))
 
-    def check_image_dir(self):
-        images = os.listdir("%s/images/" % os.environ.get("DETECTOR_PATH"))
-        if len(images) == 10:
-            for image in images:
-                os.remove("%s/images/%s" % (os.environ.get("DETECTOR_PATH"), image))
+    def check_image_dirs(self):
+        """Clean image folders based on threshold."""
+        images_detected = os.listdir("%s/images/detected/" % os.environ.get("DETECTOR_PATH"))
+        if len(images_detected) == 10:
+            for image in images_detected:
+                os.remove("%s/images/detected/%s" % (os.environ.get("DETECTOR_PATH"), image))
+        images_raw = os.listdir("%s/images/raw/" % os.environ.get("DETECTOR_PATH"))
+        if len(images_raw) == 30:
+            for image in images_raw:
+                os.remove("%s/images/raw/%s" % (os.environ.get("DETECTOR_PATH"), image))
 
     def draw_boxes(self, img, boxes, scores, img_height, img_width):
+        """Draw box on the detected tank."""
         for i in range(len(boxes)):
             ymin = round(boxes[i][0] * img_height)
             xmin = round(boxes[i][1] * img_width)
@@ -43,13 +54,19 @@ class Detector:
         return img
 
     def detect(self, img):
+        """Conduct detection for the given image."""
+        if isinstance(img, list):
+            return False, None
+        self.check_image_dirs()
+        input_mean, input_std = 127.5, 127.5
+        raw_filename = int(time.time())
+        cv2.imwrite("%s/images/raw/%d.jpg" % (os.environ.get("DETECTOR_PATH"), raw_filename), img)
         img_height, img_width, _ = img.shape
         image_resized = cv2.resize(img, (self.width, self.height))
-        input_data = np.expand_dims(image_resized / 255, axis=0).astype(np.float32)
+        input_data = np.expand_dims((image_resized - input_mean) / input_std, axis=0).astype(np.float32)
         self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
         self.interpreter.invoke()
         boxes = self.interpreter.get_tensor(self.output_details[0]['index'])[0]
-        classes = self.interpreter.get_tensor(self.output_details[1]['index'])[0]
         scores = self.interpreter.get_tensor(self.output_details[2]['index'])[0]
         detected_boxes, detected_scores = [], []
         for i in range(len(scores)):
@@ -59,7 +76,7 @@ class Detector:
         if len(detected_boxes) == 0:
             return False, None
         res = self.draw_boxes(img, detected_boxes, detected_scores, img_height, img_width)
-        self.check_image_dir()
-        filename = int(time.time())
-        cv2.imwrite("%simages/%d.jpg" % (os.environ.get("DETECTOR_PATH"), filename), res)
-        return True, "%simages/%d.jpg" % (os.environ.get("DETECTOR_PATH"), filename)
+        self.check_image_dirs()
+        detected_filename = int(time.time())
+        cv2.imwrite("%s/images/detected/%d.jpg" % (os.environ.get("DETECTOR_PATH"), detected_filename), res)
+        return True, "%s/images/detected/%d.jpg" % (os.environ.get("DETECTOR_PATH"), detected_filename)
