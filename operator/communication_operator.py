@@ -10,7 +10,7 @@ from threading import Thread
 
 _BUFFER_SIZE = 4096
 
-with open("configuration.json") as _configuration_file:
+with open("../configuration.json") as _configuration_file:
     _CONFIGURATION = json.load(_configuration_file)
 
 
