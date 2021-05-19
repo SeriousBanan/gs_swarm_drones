@@ -292,7 +292,7 @@ class Drone:
         coords = vertex.coords
         responce_status = self._flight_controller.goToLocalPoint(coords.x - self._initial_coords.x,
                                                                  coords.y - self._initial_coords.y,
-                                                                 coords.z - self._initial_coords.z)
+                                                                 coords.z)
         _logger.debug(f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
 
         # Wait until drone reach point.
