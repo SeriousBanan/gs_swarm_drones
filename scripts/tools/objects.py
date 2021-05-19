@@ -214,7 +214,7 @@ class Drone:
 
             return TransferDataResponse(True)
 
-        self._recognise_service = rospy.Service("gs_swarm_drones/receive_message", TransferData, receive_message_callback)
+        self._receive_message_service = rospy.Service("gs_swarm_drones/receive_message", TransferData, receive_message_callback)
 
     @property
     def charge(self) -> float:
