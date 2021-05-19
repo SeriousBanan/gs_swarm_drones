@@ -8,77 +8,42 @@
         {
             "id": 1,
             "x": 0.0,
-            "y": 0.5
+            "y": 1.0
         },
         {
             "id": 2,
             "x": 0.0,
-            "y": 1.0
+            "y": 2.0
         },
         {
             "id": 3,
-            "x": 0.0,
-            "y": 1.5
+            "x": 1.0,
+            "y": 0.0
         },
         {
             "id": 4,
-            "x": 0.5,
-            "y": 0.0
+            "x": 1.0,
+            "y": 1.0
         },
         {
             "id": 5,
-            "x": 0.5,
-            "y": 0.5
+            "x": 1.0,
+            "y": 2.0
         },
         {
             "id": 6,
-            "x": 0.5,
-            "y": 1.0
+            "x": 2.0,
+            "y": 0.0
         },
         {
             "id": 7,
-            "x": 0.5,
-            "y": 1.5
+            "x": 2.0,
+            "y": 1.0
         },
         {
             "id": 8,
-            "x": 1.0,
-            "y": 0.0
-        },
-        {
-            "id": 9,
-            "x": 1.0,
-            "y": 0.5
-        },
-        {
-            "id": 10,
-            "x": 1.0,
-            "y": 1.0
-        },
-        {
-            "id": 11,
-            "x": 1.0,
-            "y": 1.5
-        },
-        {
-            "id": 12,
-            "x": 1.5,
-            "y": 0.0
-        },
-        {
-            "id": 13,
-            "x": 1.5,
-            "y": 0.5
-        },
-        {
-            "id": 14,
-            "x": 1.5,
-            "y": 1.0
-        },
-        {
-            "id": 15,
-            "x": 1.5,
-            "y": 1.5
+            "x": 2.0,
+            "y": 2.0
         }
     ],
     "edges": [
@@ -88,11 +53,11 @@
         },
         {
             "from id": 0,
-            "to id": 5
+            "to id": 4
         },
         {
             "from id": 0,
-            "to id": 4
+            "to id": 3
         },
         {
             "from id": 1,
@@ -100,10 +65,6 @@
         },
         {
             "from id": 1,
-            "to id": 6
-        },
-        {
-            "from id": 1,
             "to id": 5
         },
         {
@@ -112,19 +73,11 @@
         },
         {
             "from id": 1,
-            "to id": 0
-        },
-        {
-            "from id": 2,
             "to id": 3
         },
         {
-            "from id": 2,
-            "to id": 7
-        },
-        {
-            "from id": 2,
-            "to id": 6
+            "from id": 1,
+            "to id": 0
         },
         {
             "from id": 2,
@@ -132,7 +85,15 @@
         },
         {
             "from id": 2,
+            "to id": 4
+        },
+        {
+            "from id": 2,
             "to id": 1
+        },
+        {
+            "from id": 3,
+            "to id": 4
         },
         {
             "from id": 3,
@@ -144,7 +105,11 @@
         },
         {
             "from id": 3,
-            "to id": 2
+            "to id": 0
+        },
+        {
+            "from id": 3,
+            "to id": 1
         },
         {
             "from id": 4,
@@ -152,11 +117,19 @@
         },
         {
             "from id": 4,
-            "to id": 9
+            "to id": 8
         },
         {
             "from id": 4,
-            "to id": 8
+            "to id": 7
+        },
+        {
+            "from id": 4,
+            "to id": 6
+        },
+        {
+            "from id": 4,
+            "to id": 3
         },
         {
             "from id": 4,
@@ -167,16 +140,8 @@
             "to id": 1
         },
         {
-            "from id": 5,
-            "to id": 6
-        },
-        {
-            "from id": 5,
-            "to id": 10
-        },
-        {
-            "from id": 5,
-            "to id": 9
+            "from id": 4,
+            "to id": 2
         },
         {
             "from id": 5,
@@ -184,11 +149,11 @@
         },
         {
             "from id": 5,
-            "to id": 4
+            "to id": 7
         },
         {
             "from id": 5,
-            "to id": 0
+            "to id": 4
         },
         {
             "from id": 5,
@@ -204,39 +169,15 @@
         },
         {
             "from id": 6,
-            "to id": 11
-        },
-        {
-            "from id": 6,
-            "to id": 10
-        },
-        {
-            "from id": 6,
-            "to id": 9
-        },
-        {
-            "from id": 6,
-            "to id": 5
-        },
-        {
-            "from id": 6,
-            "to id": 1
-        },
-        {
-            "from id": 6,
-            "to id": 2
-        },
-        {
-            "from id": 6,
             "to id": 3
         },
         {
-            "from id": 7,
-            "to id": 11
+            "from id": 6,
+            "to id": 4
         },
         {
             "from id": 7,
-            "to id": 10
+            "to id": 8
         },
         {
             "from id": 7,
@@ -244,23 +185,19 @@
         },
         {
             "from id": 7,
-            "to id": 2
-        },
-        {
-            "from id": 7,
             "to id": 3
         },
         {
-            "from id": 8,
-            "to id": 9
+            "from id": 7,
+            "to id": 4
+        },
+        {
+            "from id": 7,
+            "to id": 5
         },
         {
             "from id": 8,
-            "to id": 13
-        },
-        {
-            "from id": 8,
-            "to id": 12
+            "to id": 7
         },
         {
             "from id": 8,
@@ -269,154 +206,6 @@
         {
             "from id": 8,
             "to id": 5
-        },
-        {
-            "from id": 9,
-            "to id": 10
-        },
-        {
-            "from id": 9,
-            "to id": 14
-        },
-        {
-            "from id": 9,
-            "to id": 13
-        },
-        {
-            "from id": 9,
-            "to id": 12
-        },
-        {
-            "from id": 9,
-            "to id": 8
-        },
-        {
-            "from id": 9,
-            "to id": 4
-        },
-        {
-            "from id": 9,
-            "to id": 5
-        },
-        {
-            "from id": 9,
-            "to id": 6
-        },
-        {
-            "from id": 10,
-            "to id": 11
-        },
-        {
-            "from id": 10,
-            "to id": 15
-        },
-        {
-            "from id": 10,
-            "to id": 14
-        },
-        {
-            "from id": 10,
-            "to id": 13
-        },
-        {
-            "from id": 10,
-            "to id": 9
-        },
-        {
-            "from id": 10,
-            "to id": 5
-        },
-        {
-            "from id": 10,
-            "to id": 6
-        },
-        {
-            "from id": 10,
-            "to id": 7
-        },
-        {
-            "from id": 11,
-            "to id": 15
-        },
-        {
-            "from id": 11,
-            "to id": 14
-        },
-        {
-            "from id": 11,
-            "to id": 10
-        },
-        {
-            "from id": 11,
-            "to id": 6
-        },
-        {
-            "from id": 11,
-            "to id": 7
-        },
-        {
-            "from id": 12,
-            "to id": 13
-        },
-        {
-            "from id": 12,
-            "to id": 8
-        },
-        {
-            "from id": 12,
-            "to id": 9
-        },
-        {
-            "from id": 13,
-            "to id": 14
-        },
-        {
-            "from id": 13,
-            "to id": 12
-        },
-        {
-            "from id": 13,
-            "to id": 8
-        },
-        {
-            "from id": 13,
-            "to id": 9
-        },
-        {
-            "from id": 13,
-            "to id": 10
-        },
-        {
-            "from id": 14,
-            "to id": 15
-        },
-        {
-            "from id": 14,
-            "to id": 13
-        },
-        {
-            "from id": 14,
-            "to id": 9
-        },
-        {
-            "from id": 14,
-            "to id": 10
-        },
-        {
-            "from id": 14,
-            "to id": 11
-        },
-        {
-            "from id": 15,
-            "to id": 14
-        },
-        {
-            "from id": 15,
-            "to id": 10
-        },
-        {
-            "from id": 15,
-            "to id": 11
         }
     ]
 }
