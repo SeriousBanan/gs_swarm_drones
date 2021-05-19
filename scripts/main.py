@@ -223,7 +223,7 @@ def walk_graph(drone: Drone) -> None:
 
             drone.move_to(new_position)
 
-            if drone.found_object:
+            if drone.someone_found_object:
                 return
 
             found_object, path_to_image = drone.recognise()
@@ -322,6 +322,8 @@ def main(drone_id: int) -> None:
     logger.debug(f"Drone {drone_id} graph: {drone.graph}")
 
     logger.info(f"Drone {drone_id} has started walk in his graph.")
+
+    drone.wait_start_command()
 
     drone.takeoff()
     walk_graph(drone)

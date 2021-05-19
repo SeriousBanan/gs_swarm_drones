@@ -3,6 +3,7 @@ Module with objects definitions.
 """
 
 from dataclasses import dataclass, field
+import json
 from typing import Dict, Any, Set, Iterator, Tuple, Union
 from time import sleep
 
@@ -167,11 +168,17 @@ class Drone:
     global_graph: Graph
     graph: Graph = field(default_factory=Graph)
     found_object: bool = False
+    someone_found_object: bool = False
     _board_manager: _BoardManager = field(default_factory=_BoardManager)
     _sensor_manager: _SensorManager = field(default_factory=_SensorManager)
     _flight_callback_event: int = 0
+    _start: bool = False
 
     def __post_init__(self):
+        # Need to  drone local position system.
+        # Will shift the global position to the local coordinate system.
+        self._initial_coords = self.position.coords
+
         # Wait until board starts.
         while not self._board_manager.runStatus():
             sleep(0.05)
@@ -186,8 +193,28 @@ class Drone:
         rospy.wait_for_service("gs_swarm_drones/recognise")
         self._recognise_service = rospy.ServiceProxy("gs_swarm_drones/recognise", Recognise)
 
+        rospy.wait_for_service("gs_swarm_drones/send_message")
+        self._send_message_service = rospy.ServiceProxy("gs_swarm_drones/send_message", TransferData)
+
         rospy.wait_for_service("gs_swarm_drones/send_image")
         self._send_image_service = rospy.ServiceProxy("gs_swarm_drones/send_image", TransferData)
+
+        def receive_message_callback(data):
+
+            if data.data == "start":
+                self._start = True
+                return TransferDataResponse(True)
+
+            try:
+                message = json.loads(data.data)
+                if message["found"]:
+                    self.someone_found_object = True
+            except (KeyError, json.decoder.JSONDecodeError):
+                return TransferDataResponse(False)
+
+            return TransferDataResponse(True)
+
+        self._recognise_service = rospy.Service("gs_swarm_drones/receive_message", TransferData, receive_message_callback)
 
     @property
     def charge(self) -> float:
@@ -203,6 +230,11 @@ class Drone:
             sleep(0.05)
 
         self._flight_callback_event = 0
+
+    def wait_start_command(self):
+        """Wait until operator send `start` command."""
+        while not self._start:
+            sleep(0.05)
 
     def takeoff(self) -> None:
         """Takeoff drone from the ground."""
@@ -258,7 +290,9 @@ class Drone:
 
         # Send command to move to vertex.
         coords = vertex.coords
-        responce_status = self._flight_controller.goToLocalPoint(coords.x, coords.y, coords.z)
+        responce_status = self._flight_controller.goToLocalPoint(coords.x - self._initial_coords.x,
+                                                                 coords.y - self._initial_coords.y,
+                                                                 coords.z - self._initial_coords.z)
         _logger.debug(f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
 
         # Wait until drone reach point.
@@ -266,6 +300,17 @@ class Drone:
 
         self.position = vertex
         _logger.info(f"Drone {self.id_} has reached {vertex}")
+
+        self.send_message({
+            "id": self.id_,
+            "coords": {
+                "x": self.position.coords.x,
+                "y": self.position.coords.y,
+                "z": self.position.coords.z,
+            },
+            "charge": self.charge,
+            "found": self.found_object
+        })
 
     def recognise(self) -> Tuple[bool, str]:
         """Recognise tank using camera."""
@@ -288,7 +333,10 @@ class Drone:
         """Sending message to other drones."""
 
         _logger.info(f"Drone {self.id_} posting {data}.")
-        ...
+        response = self._send_message_service(json.dumps(data))
+
+        _logger.debug(f"Drone {self.id_} gs_swarm_drones/send_message response: {response}")
+        _logger.info(f"Drone {self.id_} has send image.")
 
     def send_image(self, image_path: str) -> None:
         """Sending image to operator."""
