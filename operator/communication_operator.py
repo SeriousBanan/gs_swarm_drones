@@ -5,7 +5,7 @@
 import socket
 import json
 import os
-from typing import NoReturn, Callable
+from typing import Callable
 from threading import Thread
 
 _BUFFER_SIZE = 4096
@@ -111,8 +111,9 @@ def create_listener(callback: Callable[[str, str], None]) -> None:
     if getattr(create_listener, "listener_created", True):
         return
     setattr(create_listener, "listener_created", False)
+    setattr(create_listener, "tread_stopped", False)
 
-    def listener() -> NoReturn:
+    def listener() -> None:
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         server_address = (_CONFIGURATION["addresses"]["operator"]["ip"],
@@ -123,7 +124,7 @@ def create_listener(callback: Callable[[str, str], None]) -> None:
         # Listening to incoming connections.
         server_sock.listen(10)
 
-        while True:
+        while not getattr(create_listener, "tread_stopped", True):
             # Waiting for connection.
             sock, _ = server_sock.accept()
             message_info = {}  # type: ignore
@@ -135,15 +136,15 @@ def create_listener(callback: Callable[[str, str], None]) -> None:
                 while True:
                     data = sock.recv(_BUFFER_SIZE)
 
-                    # Firstly get info about message.
-                    if not message_info:
-                        message_info = json.loads(data.decode())
-                        sock.sendall(b"got message info")
-
                     # Close connection after receiving whole message or if connection broken.
-                    elif data == b"$close$" or not data:
+                    if data == b"$close$" or not data:
                         sock.close()
                         break
+
+                    # Firstly get info about message.
+                    elif not message_info:
+                        message_info = json.loads(data.decode())
+                        sock.sendall(b"got message info")
 
                     elif not finished:
                         if data[-10:] == b"$finished$":
@@ -162,6 +163,9 @@ def create_listener(callback: Callable[[str, str], None]) -> None:
                     elif finished:
                         sock.sendall(b"got message")
 
+            if not message_info:
+                break
+
             # Processing text
             if message_info["type"] == "text":
                 callback("text", message.decode())
@@ -178,3 +182,17 @@ def create_listener(callback: Callable[[str, str], None]) -> None:
 
 
 setattr(create_listener, "listener_created", False)
+
+
+def stop_listener() -> None:
+    """Stop listener on socket."""
+
+    setattr(create_listener, "tread_stopped", True)
+
+    if getattr(create_listener, "listener_created", False):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            server_address = (_CONFIGURATION["addresses"]["operator"]["ip"],
+                              _CONFIGURATION["addresses"]["operator"]["port"])
+            sock.connect(server_address)
+
+        setattr(create_listener, "listener_created", False)
