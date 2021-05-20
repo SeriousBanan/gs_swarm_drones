@@ -1,4 +1,7 @@
 <launch>
+    <include file="$(find gs_core)/launch/pioneer.launch"/>
+    <include file="$(find gs_camera)/launch/camera.launch"/>
+
     <env name="PKG_PATH" value="$(find gs_swarm_drones)"/>
     <env name="DETECTOR_PATH" value="$(find gs_swarm_drones)/scripts/detector"/>
     <arg name="field_path" default="$(find gs_swarm_drones)/field.json" doc="Path to json file with field configuration."/>
