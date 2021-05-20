@@ -216,6 +216,18 @@ class Drone:
 
         self._receive_message_service = rospy.Service("gs_swarm_drones/receive_message", TransferData, receive_message_callback)
 
+        # Sending information about where drone located.
+        self.send_message({
+            "id": self.id_,
+            "coords": {
+                "x": self.position.coords.x,
+                "y": self.position.coords.y,
+                "z": 0,
+            },
+            "charge": self.charge,
+            "found": self.found_object
+        })
+
     @property
     def charge(self) -> float:
         """Return charge of the Drone."""
@@ -223,7 +235,7 @@ class Drone:
         charge = self._sensor_manager.power()
         _logger.info(f"Drone {self.id_} charge: {charge}.")
 
-        return self._sensor_manager.power()
+        return (12.6 - self._sensor_manager.power()[0]) / (12.6 - 10.5)
 
     def _wait_flight_callback_event(self, event: int) -> None:
         while self._flight_callback_event != event:
@@ -280,6 +292,18 @@ class Drone:
         # Send command to stop engines.
         responce_status = self._flight_controller.disarm()
         _logger.debug(f"Drone {self.id_} _flight_controller.disarm responce: {responce_status}")
+
+        # Sending information about where drone located.
+        self.send_message({
+            "id": self.id_,
+            "coords": {
+                "x": self.position.coords.x,
+                "y": self.position.coords.y,
+                "z": 0,
+            },
+            "charge": self.charge,
+            "found": self.found_object
+        })
 
         _logger.info(f"Drone {self.id_} has stopped engines.")
 
