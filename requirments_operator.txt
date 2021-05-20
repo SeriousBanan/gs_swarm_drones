@@ -1,2 +1,2 @@
-Kivy
+kivy[full]
 kivy-garden.mapview
