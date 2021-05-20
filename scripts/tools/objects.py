@@ -245,8 +245,17 @@ class Drone:
 
     def wait_start_command(self):
         """Wait until operator send `start` command."""
+
         while not self._start:
             sleep(0.05)
+
+    def reset_default_attributes(self):
+        """Reset default attributes."""
+
+        self._start = False
+        self.graph = Graph
+        self.found_object = False
+        self.someone_found_object = False
 
     def takeoff(self) -> None:
         """Takeoff drone from the ground."""
