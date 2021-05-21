@@ -235,7 +235,7 @@ class Drone:
         charge = self._sensor_manager.power()
         _logger.info(f"Drone {self.id_} charge: {charge}.")
 
-        return (12.6 - self._sensor_manager.power()[0]) / (12.6 - 10.5)
+        return round((self._sensor_manager.power()[0] - 10.5) / (12.6 - 10.5), 2)
 
     def _wait_flight_callback_event(self, event: int) -> None:
         while self._flight_callback_event != event:
@@ -369,7 +369,7 @@ class Drone:
         response = self._send_message_service(json.dumps(data))
 
         _logger.debug(f"Drone {self.id_} gs_swarm_drones/send_message response: {response}")
-        _logger.info(f"Drone {self.id_} has send image.")
+        _logger.info(f"Drone {self.id_} has send message.")
 
     def send_image(self, image_path: str) -> None:
         """Sending image to operator."""
