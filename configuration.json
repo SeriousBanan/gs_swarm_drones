@@ -2,12 +2,13 @@
     "drone id": 0,
     "drones count": 2,
     "drones initial positions": {
-        "0": 0
+        "0": 6,
+        "1": 0
     },
     "drone flight altitude": 1,
     "addresses": {
         "operator": {
-            "ip": "192.168.1.6",
+            "ip": "192.168.1.2",
             "port": 10000
         },
         "0": {
