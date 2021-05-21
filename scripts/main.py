@@ -307,38 +307,37 @@ def main(drone_id: int) -> None:
     logger.info(f"Drone {drone_id} initialized:\n"
                 f"\t{drone}")
 
-    while True:
-        drone.wait_start_command()
+    drone.wait_start_command()
 
-        logger.info(f"Drone {drone_id} has started initialization of values in global graph.")
+    logger.info(f"Drone {drone_id} has started initialization of values in global graph.")
 
-        fill_global_values(drone)
+    fill_global_values(drone)
 
-        logger.info(f"Drone {drone_id} has completed initialization of values in global graph.")
-        logger.debug(f"Drone {drone_id} global graph: {global_graph}")
+    logger.info(f"Drone {drone_id} has completed initialization of values in global graph.")
+    logger.debug(f"Drone {drone_id} global graph: {global_graph}")
 
-        logger.info(f"Drone {drone_id} has started splitting of global graph.")
+    logger.info(f"Drone {drone_id} has started splitting of global graph.")
 
-        split_graph(drone)
+    split_graph(drone)
 
-        logger.info(f"Drone {drone_id} has completed splitting of global graph.")
-        logger.debug(f"Drone {drone_id} graph: {drone.graph}")
+    logger.info(f"Drone {drone_id} has completed splitting of global graph.")
+    logger.debug(f"Drone {drone_id} graph: {drone.graph}")
 
-        logger.info(f"Drone {drone_id} has started walk in his graph.")
+    logger.info(f"Drone {drone_id} has started walk in his graph.")
 
-        drone.takeoff()
-        walk_graph(drone)
+    drone.takeoff()
+    walk_graph(drone)
 
-        logger.info(f"Drone {drone_id} has completed his work.")
-        logger.info(f"Drone {drone_id} returning to base.")
+    logger.info(f"Drone {drone_id} has completed his work.")
+    logger.info(f"Drone {drone_id} returning to base.")
 
-        return_to_base(drone)
+    return_to_base(drone)
 
-        drone.landing()
+    drone.landing()
 
-        logger.debug(f"Drone {drone_id} has landed.")
+    logger.debug(f"Drone {drone_id} has landed.")
 
-        drone.reset_default_attributes()
+    drone.reset_default_attributes()
 
 
 if __name__ == "__main__":
