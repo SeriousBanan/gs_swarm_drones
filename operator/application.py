@@ -86,7 +86,7 @@ class SendButton(Button):
             UI.DATA_INPUT.text = ""
 
         if self.cmnd == "start":
-            UI.IMAGE.source = None
+            UI.IMAGE.source = "blank_image.png"
             UI.IMAGE.reload()
 
 
@@ -178,6 +178,7 @@ class UI(App):
 
         image_widget = AsyncImage()
         UI.IMAGE = image_widget
+        UI.IMAGE.source = "blank_image.png"
 
         drone_table.add_widget(scroll)
         drone_table.add_widget(info_widget)
