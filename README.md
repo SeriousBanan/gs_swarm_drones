@@ -6,6 +6,7 @@ A repository with the source code for launching a swarm of Pioneer-Max drones pe
 
 -   ROS Noetic (installation: <http://wiki.ros.org/noetic/Installation>)
 -   Python 3.8 (Download: <https://www.python.org/downloads/>)
+-   Operator application on PC (<https://github.com/SeriousBanan/gs_swarm_drones_operator>)
 
 ## Installation on drone
 
@@ -40,21 +41,7 @@ A repository with the source code for launching a swarm of Pioneer-Max drones pe
 5. Install required python modules.
 
     ```bash
-    python3 -m pip install -r <path to gs_swarm_drones>/requirements_drone.txt
-    ```
-
-## Installation of operator
-
-1. Clone gs_swarm_drones repository.
-
-    ```bash
-    git clone https://github.com/SeriousBanan/gs_swarm_drones.git
-    ```
-
-2. Install required python modules.
-
-    ```bash
-    python3 -m pip install -r <path to gs_swarm_drones>/requirements_operator.txt
+    python3 -m pip install -r <path to gs_swarm_drones>/requirements.txt
     ```
 
 ## Preparing to launch
@@ -165,20 +152,6 @@ A repository with the source code for launching a swarm of Pioneer-Max drones pe
 7. Set drones to it's start positions.
 
 8. Move the switch on the console to the software mode.
-
-## Launching operator application
-
-1. Go to folder with operator application file:
-
-    ```bash
-    cd <path to gs_swarm_drones>/operator
-    ```
-
-2. Launch python script:
-
-    ```bash
-    python3 application.py
-    ```
 
 ## Launching drones
 
