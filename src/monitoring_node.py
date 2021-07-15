@@ -2,26 +2,18 @@
 
 """Main module of monitoring for swarm of drones."""
 
-import os
 import json
+import os
 from typing import List, Set
 
 import rospy
+from scripts.tools.objects import Drone, Graph, Vertex
+from scripts.tools.setup_loggers import logger
+from scripts.tools.useful_functions import distance, initialize_graph_from_dict
 
 PKG_PATH = os.getenv("PKG_PATH")
 if PKG_PATH:
     os.chdir(PKG_PATH)
-
-try:
-    from .tools.useful_functions import (initialize_graph_from_dict,
-                                         distance)
-    from .tools.objects import Drone, Graph, Vertex
-    from .tools.setup_loggers import logger
-except ImportError:
-    from tools.useful_functions import (initialize_graph_from_dict,  # type: ignore
-                                        distance)  # type: ignore
-    from tools.objects import Drone, Graph, Vertex  # type: ignore
-    from tools.setup_loggers import logger  # type: ignore
 
 
 def fill_graph_values(graph: Graph, start_vertex: Vertex) -> None:
@@ -248,7 +240,8 @@ def return_to_base(drone: Drone) -> None:
             raise ValueError("Given vertex not in graph.")
 
         not_checked = set(graph)
-        distances = {vertex: float("inf") for vertex in graph}  # distances between to_vertex and vertex.
+        # distances between to_vertex and vertex.
+        distances = {vertex: float("inf") for vertex in graph}
         ancestor = {}
 
         distances[from_vertex] = 0
@@ -283,8 +276,7 @@ def return_to_base(drone: Drone) -> None:
 
         return path
 
-    path = find_path(graph=drone.graph,
-                     from_vertex=drone.position,
+    path = find_path(graph=drone.graph, from_vertex=drone.position,
                      to_vertex=drone.graph[CONFIGURATION["drones initial positions"][str(drone.id_)]])
 
     for vertex in path:
@@ -341,7 +333,7 @@ def main(drone_id: int) -> None:
 
 
 if __name__ == "__main__":
-    rospy.init_node("gs_swarm_drones_node")
+    rospy.init_node("monitoring_node")
 
     _configuration_path = rospy.get_param(rospy.search_param("configuration_path"))
     _field_path = rospy.get_param(rospy.search_param("field_path"))

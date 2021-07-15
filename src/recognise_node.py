@@ -2,19 +2,14 @@
 
 """Module that creates servise for recognising tanks using camera."""
 
+import cv2 as _
 import rospy
-import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 
-# pylint: disable=import-error, no-name-in-module
-from gs_swarm_drones.srv import Recognise, RecogniseResponse  # type: ignore
-# pylint: enable=import-error, no-name-in-module
+from gs_swarm_drones.srv import Recognise, RecogniseResponse
 
-try:
-    from .detector.detector import Detector
-except ImportError:
-    from detector.detector import Detector  # type: ignore
+from scripts.detector.detector import Detector
 
 detector = Detector(0.5)
 img = []
@@ -38,7 +33,7 @@ def detect_tank(_):
     return RecogniseResponse(flag, path)
 
 
-rospy.init_node("gs_swarm_drones_recognise_node")
+rospy.init_node("recognise_node")
 
 rospy.Subscriber("pioneer_max_camera/image_raw", Image, img_callback)
 

@@ -7,14 +7,14 @@
     <arg name="field_path" default="$(find gs_swarm_drones)/field.json" doc="Path to json file with field configuration."/>
     <arg name="configuration_path" default="$(find gs_swarm_drones)/configuration.json" doc="Path to json file with drone configuration."/>
 
-    <node pkg="gs_swarm_drones" type="main.py" name="gs_swarm_drones_node">
+    <node pkg="gs_swarm_drones" type="monitoring_node.py" name="monitoring_node">
         
         <param name="field_path" value="$(arg field_path)"/>
         <param name="configuration_path" value="$(arg configuration_path)"/>
     </node>
 
-    <node pkg="gs_swarm_drones" type="recognise.py" name="gs_swarm_drones_recognise_node"/>
-    <node pkg="gs_swarm_drones" type="communication.py" name="gs_swarm_drones_communication_node">
+    <node pkg="gs_swarm_drones" type="recognise_node.py" name="recognise_node"/>
+    <node pkg="gs_swarm_drones" type="communication_node.py" name="communication_node">
 
         <param name="configuration_path" value="$(arg configuration_path)"/>
     </node>

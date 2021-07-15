@@ -2,9 +2,9 @@
 
 """Module for communications with drones."""
 
-import socket
 import json
 import os
+import socket
 from typing import NoReturn
 
 import rospy
@@ -182,7 +182,7 @@ def listening() -> NoReturn:
 
 
 if __name__ == '__main__':
-    rospy.init_node("gs_swarm_drones_communication_node")
+    rospy.init_node("communication_node")
 
     _configuration_path = rospy.get_param(rospy.search_param("configuration_path"))
 
