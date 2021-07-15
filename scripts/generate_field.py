@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
-
 """
 Module that generate graph of some parallelogram like field
 and write it as json to file with name `SAVE_TO_FILE_NAME` for further
 reading and initializing.
+
 First write info about vertexes. Then write info about edges.
+
 Output file content:
 {
     "vertexes": [
@@ -51,6 +51,7 @@ Output file content:
         }
     ]
 }
+
 which initialize next graph:
 (1) - (2)
  |  /
@@ -59,15 +60,13 @@ which initialize next graph:
 
 import argparse
 import json
-from typing import Tuple, Dict, List, Any
+from typing import Any, Dict, List, Tuple
 
 
 def save_graph_to_file(size: Tuple[float, float],
                        vertex_size: Tuple[float, float],
                        file_name: str) -> None:
-    """
-    Generate graph of size: `size` and save it as json to file named `file_name`.
-    """
+    """Generate graph of size: `size` and save it as json to file named `file_name`."""
 
     data: Dict[str, List[Dict[str, Any]]] = {
         "vertexes": [],
@@ -102,8 +101,12 @@ if __name__ == "__main__":
     parser.add_argument("height", type=float, help="Field height.")
     parser.add_argument("vertex_width", type=float, help="Vertex height.")
     parser.add_argument("vertex_height", type=float, help="Vertex height.")
-    parser.add_argument("--filename", default="field.json", help="Name of file where to save field. Default: field.json")
+    parser.add_argument("--filename",
+                        default="field.json",
+                        help="Name of file where to save field. Default: field.json")
 
     args = parser.parse_args()
 
-    save_graph_to_file((args.width, args.height), (args.vertex_width, args.vertex_height), args.filename)
+    save_graph_to_file((args.width, args.height),
+                       (args.vertex_width, args.vertex_height),
+                       args.filename)

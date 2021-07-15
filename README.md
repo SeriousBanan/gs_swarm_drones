@@ -55,7 +55,7 @@ A repository with the source code for launching a swarm of Pioneer-Max drones pe
 2. Generate field file.
 
     ```bash
-    python3 -m generate_field.py <field with> <field_height> <vertex_width> <vertex_height>
+    python3 scripts/generate_field.py <field with> <field_height> <vertex_width> <vertex_height>
     ```
 
     It will generate json file `field.json` with field definition of vertexes (ids and positions) and edges between vertexes.
