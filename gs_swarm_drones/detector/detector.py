@@ -1,6 +1,7 @@
 import os
-import cv2
 import time
+
+import cv2
 import numpy as np
 import tflite_runtime.interpreter as tflite
 
@@ -50,7 +51,18 @@ class Detector:
             bbox_mess = "tank " + str(scores[i])
             t_size = cv2.getTextSize(bbox_mess, 0, 0.5, thickness=bbox_thick // 2)[0]
             cv2.rectangle(img, c1, (c1[0] + t_size[0], c1[1] - t_size[1] - 3), (10, 255, 0), -1)
-            cv2.putText(img, bbox_mess, (c1[0], c1[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), bbox_thick // 2, lineType=cv2.LINE_AA)
+            cv2.putText(
+                img,
+                bbox_mess,
+                (c1[0],
+                 c1[1] - 2),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0,
+                 0,
+                 0),
+                bbox_thick // 2,
+                lineType=cv2.LINE_AA)
         return img
 
     def detect(self, img):
@@ -63,7 +75,10 @@ class Detector:
         cv2.imwrite("%s/images/raw/%d.jpg" % (os.environ.get("DETECTOR_PATH"), raw_filename), img)
         img_height, img_width, _ = img.shape
         image_resized = cv2.resize(img, (self.width, self.height))
-        input_data = np.expand_dims((image_resized - input_mean) / input_std, axis=0).astype(np.float32)
+        input_data = np.expand_dims(
+            (image_resized - input_mean) / input_std,
+            axis=0).astype(
+            np.float32)
         self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
         self.interpreter.invoke()
         boxes = self.interpreter.get_tensor(self.output_details[0]['index'])[0]
@@ -78,5 +93,7 @@ class Detector:
         res = self.draw_boxes(img, detected_boxes, detected_scores, img_height, img_width)
         self.check_image_dirs()
         detected_filename = int(time.time())
-        cv2.imwrite("%s/images/detected/%d.jpg" % (os.environ.get("DETECTOR_PATH"), detected_filename), res)
-        return True, "%s/images/detected/%d.jpg" % (os.environ.get("DETECTOR_PATH"), detected_filename)
+        cv2.imwrite("%s/images/detected/%d.jpg" %
+                    (os.environ.get("DETECTOR_PATH"), detected_filename), res)
+        return True, "%s/images/detected/%d.jpg" % (
+            os.environ.get("DETECTOR_PATH"), detected_filename)

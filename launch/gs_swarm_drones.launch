@@ -3,7 +3,7 @@
     <include file="$(find gs_camera)/launch/camera.launch"/>
 
     <env name="PKG_PATH" value="$(find gs_swarm_drones)"/>
-    <env name="DETECTOR_PATH" value="$(find gs_swarm_drones)/scripts/detector"/>
+    <env name="DETECTOR_PATH" value="$(find gs_swarm_drones)/gs_swarm_drones/detector"/>
     <arg name="field_path" default="$(find gs_swarm_drones)/field.json" doc="Path to json file with field configuration."/>
     <arg name="configuration_path" default="$(find gs_swarm_drones)/configuration.json" doc="Path to json file with drone configuration."/>
 

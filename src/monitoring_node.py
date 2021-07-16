@@ -7,9 +7,8 @@ import os
 from typing import List, Set
 
 import rospy
-from scripts.tools.objects import Drone, Graph, Vertex
-from scripts.tools.setup_loggers import logger
-from scripts.tools.useful_functions import distance, initialize_graph_from_dict
+from gs_swarm_drones import (Drone, Graph, Vertex, distance,
+                             initialize_graph_from_dict, logger)
 
 PKG_PATH = os.getenv("PKG_PATH")
 if PKG_PATH:

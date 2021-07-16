@@ -9,7 +9,7 @@ from sensor_msgs.msg import Image
 
 from gs_swarm_drones.srv import Recognise, RecogniseResponse
 
-from scripts.detector.detector import Detector
+from gs_swarm_drones import Detector
 
 detector = Detector(0.5)
 img = []
