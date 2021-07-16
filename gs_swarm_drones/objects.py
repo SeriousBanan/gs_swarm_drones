@@ -2,21 +2,18 @@
 Module with objects definitions.
 """
 
-from dataclasses import dataclass, field
 import json
-from typing import Dict, Any, Set, Iterator, Tuple, Union
+from dataclasses import dataclass, field
 from time import sleep
+from typing import Any, Dict, Iterator, Set, Tuple, Union
 
-from gs_board import BoardManager as _BoardManager  # pylint: disable=no-name-in-module
-from gs_flight import (FlightController as _FlightController,  # pylint: disable=no-name-in-module
-                       CallbackEvent as _CallbackEvent)  # pylint: disable=no-name-in-module
-from gs_sensors import SensorManager as _SensorManager  # pylint: disable=no-name-in-module
-import rospy  # pylint: disable=no-name-in-module
+import rospy
+from gs_board import BoardManager as _BoardManager
+from gs_flight import CallbackEvent as _CallbackEvent
+from gs_flight import FlightController as _FlightController
+from gs_sensors import SensorManager as _SensorManager
 
-# pylint: disable=import-error, no-name-in-module
-from gs_swarm_drones.srv import Recognise  # type: ignore
-from gs_swarm_drones.srv import TransferData, TransferDataResponse  # type: ignore
-# pylint: enable=import-error, no-name-in-module
+from gs_swarm_drones.srv import Recognise, TransferData, TransferDataResponse
 
 from .setup_loggers import logger as _logger
 
@@ -194,7 +191,8 @@ class Drone:
         self._recognise_service = rospy.ServiceProxy("gs_swarm_drones/recognise", Recognise)
 
         rospy.wait_for_service("gs_swarm_drones/send_message")
-        self._send_message_service = rospy.ServiceProxy("gs_swarm_drones/send_message", TransferData)
+        self._send_message_service = rospy.ServiceProxy(
+            "gs_swarm_drones/send_message", TransferData)
 
         rospy.wait_for_service("gs_swarm_drones/send_image")
         self._send_image_service = rospy.ServiceProxy("gs_swarm_drones/send_image", TransferData)
@@ -214,7 +212,8 @@ class Drone:
 
             return TransferDataResponse(True)
 
-        self._receive_message_service = rospy.Service("gs_swarm_drones/receive_message", TransferData, receive_message_callback)
+        self._receive_message_service = rospy.Service(
+            "gs_swarm_drones/receive_message", TransferData, receive_message_callback)
 
         # Sending information about where drone located.
         self.send_message({
@@ -326,7 +325,8 @@ class Drone:
         responce_status = self._flight_controller.goToLocalPoint(coords.x - self._initial_coords.x,
                                                                  coords.y - self._initial_coords.y,
                                                                  coords.z)
-        _logger.debug(f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
+        _logger.debug(
+            f"Drone {self.id_} _flight_controller.goToLocalPoint responce: {responce_status}.")
 
         # Wait until drone reach point.
         self._wait_flight_callback_event(_CallbackEvent.POINT_REACHED)
